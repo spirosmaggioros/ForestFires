@@ -3,17 +3,56 @@ import pandas as pd
 from sklearn import linear_model
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
+
+cases = ['Low' , 'Moderate' , 'High' , 'Very High']
+
 def add_danger_column(data):
-    if data['FFMC'] < 86.1 and data['DMC'] < 27.9 and data['DC'] < 334.1 and data['ISI'] < 5.0:
-        return 1
-    if 86.1 <= data['FFMC'] <= 89.2 and 27.9 <= data['DMC'] <= 53.1 and 334.1 <= data['DC'] <= 450.6 and 5.0 <= data['ISI'] < 7.5: 
-        return 2
-    if 89.2 <= data['FFMC'] <= 93.0 and 53.1 <= data['DMC'] <= 140.7 and 450.6 <= data['DC'] < 794.4 and 7.5 <= data['ISI'] <= 13.4:
-        return 3
-    if data['FFMC'] >= 93.0 and data['DMC'] >= 140.7 and data['DC'] >= 794.4 and data['ISI'] >= 13.4:
-        return 4
+    low , moderate , high , very_high = 0 , 0, 0, 0
+    if data['FFMC'] < 86.1:
+        low += 1
+    elif 86.1 <= data['FFMC'] <= 89.2:
+        moderate += 1
+    elif 89.2 <= data['FFMC'] <= 93.0:
+        high += 1
+    elif data['FFMC'] >= 93.0:
+        very_high += 1
+
+    if data['DMC'] < 27.9:
+        low += 1
+    elif 27.9 <= data['DMC'] <= 53.1:
+        moderate += 1
+    elif 53.1 <= data['DMC'] <= 140.7:
+        high += 1
     else:
-        return np.nan
+        very_high += 1
+
+    if data['DC'] < 334.1:
+        low += 1
+    elif 334.1 <= data['DC'] <= 450.6:
+        moderate += 1
+    elif 450.6 <= data['DC'] < 794.4:
+        high += 1
+    else:
+        very_high += 1
+
+    if data['ISI'] < 5.0:
+        low += 1
+    elif 5.0 <= data['ISI'] < 7.5:
+        moderate += 1
+    elif 7.5 <= data['ISI'] <= 13.4:
+        high += 1
+    else:
+        very_high += 1
+    
+    
+    if low == max(low , moderate, high ,very_high):
+        return 1
+    elif moderate == max(low , moderate, high ,very_high):
+        return 2
+    elif high == max(low , moderate, high ,very_high):
+        return 3
+    else:
+        return 4
 
 def convert_int_to_str(data):
     if data['danger'] < 0:
