@@ -17,9 +17,5 @@ app = Dash(__name__, suppress_callback_exceptions=True)
 data = pd.read_csv("forestfires.csv")
 
 data = process_data_for_clustering(data)
-print("PRINTING...")
-print(data)
-print("DONE!")
-print("Total Missing points after gap filling -> ")
-print(data.isna().sum().sum())
-
+y_pred, y_test = svm_algorithm(data)
+print(metrics.confusion_matrix(y_test, y_pred))

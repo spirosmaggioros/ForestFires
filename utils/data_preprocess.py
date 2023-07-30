@@ -72,9 +72,8 @@ def process_data_for_clustering(data):
     data['area'] = np.log(1 + data['area'])
     data.drop(columns=['X' , 'Y' , 'month' , 'day'] , inplace=True)
     data['danger'] = data.apply(add_danger_column, axis=1)
-    imputer = IterativeImputer(estimator=linear_model.BayesianRidge(), sample_posterior=True,random_state=0)
-    data = pd.DataFrame(imputer.fit_transform(data),columns = data.columns, index=data.index)
-    data['danger'] = data.apply(convert_int_to_str, axis=1)
+    #imputer = IterativeImputer(estimator=linear_model.BayesianRidge(), sample_posterior=True,random_state=0)
+    #data = pd.DataFrame(imputer.fit_transform(data),columns = data.columns, index=data.index)
     return data
     
 

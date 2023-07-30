@@ -10,9 +10,8 @@ from sklearn.cluster import KMeans
 def svm_algorithm(data , kernel='linear', random_state=42):
     #print(data.head())
     data['area'] = np.log(1 + data['area'])
-    data['fire'] = data['area'] > 0.0
-    X = data[['FFMC', 'DMC','DC' , 'ISI', 'temp' , 'RH' , 'wind' , 'rain', 'fire']].values.tolist()
-    y = data['fire'].values.tolist()
+    X = data[['FFMC', 'DMC','DC' , 'ISI', 'temp' , 'RH' , 'wind' , 'rain', 'danger']].values.tolist()
+    y = data['danger'].values.tolist()
     X_train , X_test , y_train , y_test = train_test_split(X ,y, test_size=0.3 , random_state=random_state)
 
     clf = svm.SVC(kernel=kernel)
