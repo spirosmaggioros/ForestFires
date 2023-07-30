@@ -17,5 +17,6 @@ app = Dash(__name__, suppress_callback_exceptions=True)
 data = pd.read_csv("forestfires.csv")
 
 data = process_data_for_clustering(data)
-y_pred, y_test = svm_algorithm(data)
+y_pred, y_test = KNN_algorithm(data)
 print(metrics.confusion_matrix(y_test, y_pred))
+print(metrics.accuracy_score(y_test, y_pred))

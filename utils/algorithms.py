@@ -10,7 +10,7 @@ from sklearn.cluster import KMeans
 def svm_algorithm(data , kernel='linear', random_state=42):
     #print(data.head())
     data['area'] = np.log(1 + data['area'])
-    X = data[['FFMC', 'DMC','DC' , 'ISI', 'temp' , 'RH' , 'wind' , 'rain', 'danger']].values.tolist()
+    X = data[['FFMC', 'DMC','DC' , 'ISI', 'temp' , 'RH' , 'wind' , 'rain']].values.tolist()
     y = data['danger'].values.tolist()
     X_train , X_test , y_train , y_test = train_test_split(X ,y, test_size=0.3 , random_state=random_state)
 
@@ -32,9 +32,9 @@ def dbscan_algorithm(data , epsilon=3.5 , min_samples = 10):
 def KNN_algorithm(data , n_neighbors=5 , random_state=42):
     #data['area'] = np.log(1 + data['area'])
     data['area'] = np.log(1 + data['area'])
-    data['fire'] = data['area'] > 0.0
-    X = data[['FFMC' , 'DMC' , 'DC', 'ISI' , 'temp', 'RH', 'wind' , 'rain', 'fire']].values.tolist()
-    y = data[['fire']].values.tolist()
+    #data['fire'] = data['area'] > 0.0
+    X = data[['FFMC' , 'DMC' , 'DC', 'ISI' , 'temp', 'RH', 'wind' , 'rain']].values.tolist()
+    y = data[['danger']].values.tolist()
     X_train , X_test , y_train , y_test = train_test_split(X, y, test_size = 0.2, random_state=random_state)
 
     knn = KNeighborsClassifier(n_neighbors = n_neighbors).fit(X_train, y_train)
