@@ -5,7 +5,45 @@ import numpy as np
 from sklearn.cluster import DBSCAN
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.cluster import KMeans
+from sklearn.ensemble import  RandomForestClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.tree import plot_tree
+import matplotlib.pyplot as plt
+def random_forest_algorithm(df):
+    #print(df.head())
+    #spliting the dataset
+    X = df.drop(["danger", "month", "day"], axis=1)
+    y = df.pop('danger')
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
+
+    # Store the accuracies for different estimator values
+    accuracies = []
+    estimator_values = [10, 20, 50, 100, 150, 200, 250, 300]
+    # Train and evaluate the model for each estimator value
+    for n_estimators in estimator_values:
+        model = RandomForestClassifier(n_estimators=n_estimators, random_state=42)
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
+        accuracies.append(accuracy)
+
+    # Plot the results
+    plt.plot(estimator_values, accuracies, marker='o')
+    plt.xlabel("Estimator Values")
+    plt.ylabel("Accuracy")
+    plt.legend()
+    plt.title("Best parameters for the RFC")
+    #using the best model and graph it
+    rf = RandomForestClassifier(n_estimators=150, max_depth=3,
+                                max_features=3,
+                                min_samples_leaf=4, random_state=42)
+    rf.fit(X, y)
+    fig = plt.figure(figsize=(15, 10))
+    plot_tree(rf.estimators_[0],filled=True, impurity=True,
+              rounded=True)
+    plt.title("THE FIRST DECISION TREE")
+    plt.show()
 
 def svm_algorithm(data , kernel='linear', random_state=42):
     #print(data.head())
