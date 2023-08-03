@@ -1,0 +1,132 @@
+#importing the necessary libraries
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+#loading the dataset
+df = pd.read_csv(r"C:\Users\nikos\OneDrive\Υπολογιστής\forestfires.csv")
+print(df.head())
+print(df.tail())
+#Firstly, we should analyze what the column_names mean
+#X - x-axis spatial coordinate within the Montesinho park map: 1 to 9
+#Y - y-axis spatial coordinate within the Montesinho park map: 2 to 9
+#month - month of the year: "jan" to "dec"
+#day - day of the week: "mon" to "sun"
+#FFMC - FFMC index from the FWI system: 18.7 to 96.20
+#DMC - DMC index from the FWI system: 1.1 to 291.3
+#DC - DC index from the FWI system: 7.9 to 860.6
+#ISI - ISI index from the FWI system: 0.0 to 56.10
+#temp - temperature in Celsius degrees: 2.2 to 33.30
+#RH - relative humidity in %: 15.0 to 100
+#wind - wind speed in km/h: 0.40 to 9.40
+#rain - outside rain in mm/m2 : 0.0 to 6.4
+#area - the burned area of the forest (in ha): 0.00 to 1090.84
+#(this output variable is very skewed towards 0.0, thus it may make
+#sense to model with the logarithm transform).
+#We need further info for the FWI
+#The Fine Fuel Moisture Code (FFMC) represents fuel moisture of forest litter fuels under the shade of a forest canopy.
+#It is intended to represent moisture conditions for shaded litter fuels, the equivalent of 16-hour timelag.
+#It ranges from 0-101.
+#Subtracting the FFMC value from 100 can provide an estimate for the equivalent (approximately 10h) fuel moisture content,
+#most accurate when FFMC values are roughly above 80.
+
+#The Duff Moisture Code (DMC) represents fuel moisture of decomposed organic material underneath the litter.
+#System designers suggest that it is represents moisture conditions for the equivalent of 15-day (or 360 hr) timelag fuels.
+#It is unitless and open ended. It may provide insight to live fuel moisture stress.
+
+#The Drought Code (DC), much like the Keetch-Byrum Drought Index, represents drying deep into the soil.
+#It approximates moisture conditions for the equivalent of 53-day (1272 hour) timelag fuels.
+#It is unitless, with a maximum value of 1000. Extreme drought conditions have produced DC values near 800.
+#CITATION:https://www.nwcg.gov/publications/pms437/cffdrs/fire-weather-index-system
+#__________________________________________________#
+#Checking for missing values or unknown
+print(df.isnull().sum())
+#The data is clean since it has 0 null values
+#Statistic view of data
+print(df.describe())
+#We can see that the average burnt area is around 12.847292
+#and the avg value for wind and rain is 4.017602, 0.021663
+print(df.info)
+#We have 517 entries with 13 attribute cols
+#lets visualize the data
+#or we can catplot them
+# Mapping of month names to numbers
+month_to_number = {
+    'jan': 1,
+    'feb': 2,
+    'mar': 3,
+    'apr': 4,
+    'may': 5,
+    'jun': 6,
+    'jul': 7,
+    'aug': 8,
+    'sep': 9,
+    'oct': 10,
+    'nov': 11,
+    'dec': 12
+}
+day_to_number = {
+    'mon' : 1,
+    'tue' : 2,
+    'wed' : 3,
+    'thu' : 4,
+    'fri' : 5,
+    'sat' : 6,
+    'sun' : 7
+}
+df["month"] = df["month"].map(month_to_number)
+df["day"] = df["day"].map(day_to_number)
+print(df.head())
+sns.catplot(
+    data=df, x="month", y="area",
+    kind="bar", height=4, aspect=.6,
+)
+sns.catplot(
+    data=df, x="day", y="area",
+    kind="bar", height=4, aspect=.6,
+)
+plt.show()
+#we can see that the most dangerous days are Thursday and Saturday
+#also for the months May and september
+#different hists for burnt and not burnt areas
+df["class"] =(df['area'] > 0.0).astype(int)
+column_names = ["X","Y","month","day","FFMC","DMC","DC","ISI","temp","RH","wind","rain","area","class"]
+
+print(df.tail())
+for label in column_names[:-1]:
+    plt.hist(df[df['class']==1][label], color='blue', label='burnt', density=True, alpha=0.5)
+    plt.hist(df[df['class']==0][label], color='red',label="not burnt", density=True, alpha=0.5)
+    plt.title(label)
+    plt.ylabel("Probability")
+    plt.xlabel(label)
+    plt.legend()
+    plt.show()
+#scaling the dataset
+# 1. Min-Max Scaling (Normalization)
+#min_max_scaler = MinMaxScaler()
+#df_min_max_scaled = min_max_scaler.fit_transform(df)
+#df_min_max_scaled = pd.DataFrame(df_min_max_scaled, columns=df.columns)
+
+# 2. Standardization (Z-score normalization)
+#standard_scaler = StandardScaler()
+#df_standard_scaled = standard_scaler.fit_transform(df)
+#df_standard_scaled = pd.DataFrame(df_standard_scaled, columns=df.columns)
+#sns.heatmap(df_min_max_scaled, cmap="magma", annot=True)
+#sns.heatmap(df_standard_scaled, cmap="magma", annot=True)
+#also some scatter plots
+plt.figure(figsize=(16,8))
+plt.scatter(df["month"], df["class"])
+plt.figure(2)
+plt.figure(figsize=(16,8))
+plt.scatter(df["temp"], df["class"])
+plt.figure(3)
+plt.figure(figsize=(16,8))
+plt.scatter(df["wind"], df["class"])
+plt.figure(4)
+plt.figure(figsize=(16,8))
+plt.scatter(df["RH"], df["class"])
+plt.figure(5)
+plt.figure(figsize=(16,8))
+plt.scatter(df["FFMC"], df["class"])
+plt.show()
