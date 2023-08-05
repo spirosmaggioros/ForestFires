@@ -5,7 +5,7 @@ import pandas as pd
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 import plotly.express as px
-from data_visual import get_layout
+from visualization.visual import get_layout
 from sklearn.datasets import load_digits
 from dash import Dash
 from sklearn import metrics
