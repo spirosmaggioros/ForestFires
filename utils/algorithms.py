@@ -12,6 +12,17 @@ from sklearn.tree import plot_tree
 import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
+import math
+import pandas as pd
+import tensorflow as tf
+import matplotlib.pyplot as plt
+from tensorflow.keras import Model
+from tensorflow.keras import Sequential
+from tensorflow.keras.optimizers import Adam
+from sklearn.preprocessing import StandardScaler
+from tensorflow.keras.layers import Dense, Dropout
+from sklearn.model_selection import train_test_split
+from tensorflow.keras.losses import MeanSquaredLogarithmicError
 
 
 def random_forest_algorithm(df):
@@ -76,6 +87,76 @@ def KNNRegressor(data , n_neighbors = 5):
     #plt.show()
 
     return knn
+    
+def neural_network_for_fire_regression(data):
+    X = data[['temp', 'RH', 'wind', 'rain']].values.tolist()
+    y = data[['FFMC', 'DMC', 'DC', 'ISI']].values.tolist()
+    X_train , X_test , y_train , y_test = train_test_split(X , y , test_size=0.2 , random_state=42)
+    #scaling function
+    def scale_datasets(x_train, x_test):
+
+          """
+          Standard Scale test and train data
+          Z - Score normalization
+          """
+          # we can also use the minmax scaler or
+          #even robust
+          standard_scaler = StandardScaler()
+          x_train_scaled = pd.DataFrame(
+              standard_scaler.fit_transform(x_train),
+              columns=x_train.columns
+          )
+          x_test_scaled = pd.DataFrame(
+              standard_scaler.transform(x_test),
+              columns = x_test.columns
+          )
+          return x_train_scaled, x_test_scaled
+    x_train_scaled, x_test_scaled = scale_datasets(X_train, X_test)
+    #Scaling the data would result in faster convergence to the global optimal value for loss function optimization functions.
+    #Here we use Sklearn’s StandardScaler class which performs z-score normalization.
+    #The z-score normalization subtracts each data from its mean and divides it by the standard deviation of the data.
+    hidden_units1 = 160
+    hidden_units2 = 480
+    hidden_units3 = 256
+    learning_rate = 0.01
+    # Creating model using the Sequential in tensorflow
+    def build_model_using_sequential():
+      model = Sequential([
+        Dense(hidden_units1, kernel_initializer='normal', activation='relu'),
+        Dropout(0.2),
+        Dense(hidden_units2, kernel_initializer='normal', activation='relu'),
+        Dropout(0.2),
+        Dense(hidden_units3, kernel_initializer='normal', activation='relu'),
+        Dense(1, kernel_initializer='normal', activation='linear')
+      ])
+      return model
+    # build the model
+    model = build_model_using_sequential()
+    # loss function
+    msle = MeanSquaredLogarithmicError()
+    model.compile(
+        loss=msle,
+        optimizer=Adam(learning_rate=learning_rate),
+        metrics=[msle]
+    )
+    # train the model
+    history = model.fit(
+        x_train_scaled.values,
+        y_train.values,
+        epochs=10,
+        batch_size=64,
+        validation_split=0.2
+    )
+    def plot_history(history, key):
+      plt.plot(history.history[key])
+      plt.plot(history.history['val_'+key])
+      plt.xlabel("Epochs")
+      plt.ylabel(key)
+      plt.legend([key, 'val_'+key])
+      plt.show()
+    # Plot the history
+    plot_history(history, 'mean_squared_logarithmic_error')
+    return model, model.predict(x_test_scaled), y_test
 
 
 def svm_algorithm(data , kernel='linear', random_state=42):
