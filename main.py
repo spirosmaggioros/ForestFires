@@ -9,7 +9,7 @@ from data_visual import get_layout
 from sklearn.datasets import load_digits
 from dash import Dash
 from sklearn import metrics
-from utils.algorithms import KNN_algorithm, dbscan_algorithm, svm_algorithm, kmeans_algorithm
+from utils.algorithms import KNN_algorithm, dbscan_algorithm, svm_algorithm, kmeans_algorithm, random_forest_algorithm , KNNRegressor
 from utils.data_preprocess import process_data_for_clustering
 
 app = Dash(__name__, suppress_callback_exceptions=True)
@@ -17,22 +17,22 @@ app = Dash(__name__, suppress_callback_exceptions=True)
 data = pd.read_csv("forestfires.csv")
 
 data = process_data_for_clustering(data)
-y_pred, y_test = KNN_algorithm(data)
-print(metrics.confusion_matrix(y_test, y_pred))
-print(metrics.accuracy_score(y_test, y_pred))
+meteorological_data = pd.read_csv('naxos_data.csv')
+knn = KNNRegressor(data)
+predictions = knn.predict(meteorological_data[['temp' , 'RH' , 'wind' , 'rain']].values.tolist())
+meteorological_data['FFMC'] = predictions[: , 0]
+meteorological_data['DMC'] = predictions[: , 1]
+meteorological_data['DC'] = predictions[: , 2]
+meteorological_data['ISI'] = predictions[: , 3]
+
+meteorological_data = process_data_for_clustering(meteorological_data, include_area = False)
+
+#y_pred, y_test = KNN_algorithm(data , to_predict='area')
+#print(metrics.confusion_matrix(y_test, y_pred))
+#print(metrics.accuracy_score(y_test, y_pred))
 
 colors = {1:'blue' , 2:'yellow' , 3:'red' , 4:'darkred'}
 
-fig = go.Figure(layout=go.Layout(showlegend=True,template=None,scene=dict(xaxis = dict(title='RH'),yaxis = dict(title='wind'),zaxis = dict(title='temp')),title=go.layout.Title(text="3D Cluster After Preprocessing for cluster: " , font=dict(family="Arial",size=20,color='#000000'))))
-fig.add_trace(
-    go.Scatter3d(
-    x = data['RH'],
-    y = data['wind'],
-    z = data['temp'],
-    mode='markers',
-    marker=dict(color=data['danger'].map(colors) , size=6),
-    )
-)
-
+fig = px.line(meteorological_data , x="Date" , y="danger" , title="danger levels over the next 5 days")
 app.layout = get_layout(fig)
 app.run_server()

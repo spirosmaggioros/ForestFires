@@ -6,9 +6,14 @@ from sklearn.cluster import DBSCAN
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.cluster import KMeans
 from sklearn.ensemble import  RandomForestClassifier
-from sklearn.metrics import accuracy_score
+from sklearn import metrics
+from sklearn.metrics import accuracy_score , confusion_matrix
 from sklearn.tree import plot_tree
 import matplotlib.pyplot as plt
+import torch
+import torch.nn as nn
+
+
 def random_forest_algorithm(df):
     #print(df.head())
     #spliting the dataset
@@ -38,12 +43,40 @@ def random_forest_algorithm(df):
     rf = RandomForestClassifier(n_estimators=150, max_depth=3,
                                 max_features=3,
                                 min_samples_leaf=4, random_state=42)
-    rf.fit(X, y)
+    rf.fit(X_train, y_train)
+    
     fig = plt.figure(figsize=(15, 10))
     plot_tree(rf.estimators_[0],filled=True, impurity=True,
               rounded=True)
     plt.title("THE FIRST DECISION TREE")
     plt.show()
+    
+    return 
+
+def KNNRegressor(data , n_neighbors = 5):
+    X = data[['temp' , 'RH' , 'wind' , 'rain']].values.tolist()
+    y = data[['FFMC' , 'DMC' , 'DC' , 'ISI']].values.tolist()
+    #X_train , X_test , y_train , y_test = train_test_split(X , y , test_size=0.2 , random_state=42)
+    knn = KNeighborsRegressor(n_neighbors=n_neighbors)
+    knn.fit(X , y)
+    #y_pred = knn.predict(X_test) 
+    #visual_original = []
+    #visual_predicted = []
+
+    #for i in range(len(y_pred)):
+    #    visual_original.append(y_test[i][1])
+
+    #for i in range(len(y_pred)):
+    #    visual_predicted.append(y_pred[i][1])
+
+    #fig = plt.figure()
+    #plt.plot(visual_original , label='original')
+    #plt.plot(visual_predicted , label='predicted')
+    #plt.legend()
+    #plt.show()
+
+    return knn
+
 
 def svm_algorithm(data , kernel='linear', random_state=42):
     #print(data.head())
@@ -67,12 +100,9 @@ def dbscan_algorithm(data , epsilon=3.5 , min_samples = 10):
     data['cluster'] = clustering.labels_
     return data
 
-def KNN_algorithm(data , n_neighbors=5 , random_state=42):
-    #data['area'] = np.log(1 + data['area'])
-    data['area'] = np.log(1 + data['area'])
-    #data['fire'] = data['area'] > 0.0
+def KNN_algorithm(data ,to_predict, n_neighbors=5 , random_state=42):
     X = data[['FFMC' , 'DMC' , 'DC', 'ISI' , 'temp', 'RH', 'wind' , 'rain']].values.tolist()
-    y = data[['danger']].values.tolist()
+    y = data[[to_predict]].values.tolist()
     X_train , X_test , y_train , y_test = train_test_split(X, y, test_size = 0.2, random_state=random_state)
 
     knn = KNeighborsClassifier(n_neighbors = n_neighbors).fit(X_train, y_train)
