@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from dash import html, dcc, dash_table
 
-def get_layout(fig , dropdown_figure):
+def get_layout(fig ,fig2,fig3, dropdown_figure):
     layout = html.Div(
         children=[
         dbc.Row([
@@ -41,11 +41,22 @@ def get_layout(fig , dropdown_figure):
         dbc.Row(
             dbc.Col(
                     dcc.Graph(id='graph1', figure=fig, style={'width': '90vh', 'height': '90vh'}),
-                align = "center",
+                    align = "center",
             ), 
-        ),],
-        
-        
+        ),
+        dbc.Row(
+            dbc.Col(
+                    dcc.Graph(id='graph2' , figure=fig2 , style={'width' : '90vh' , 'height':'90vh'}),
+                    align='center',
+                    ),
+            ),
+        dbc.Row(
+            dbc.Col(
+                dcc.Graph(id='graph3' , figure=fig3 , style={'width' : '90vh' , 'height':'90vh'}),
+                align='center',
+                ),
+            ),
+        ],
     )
 
     return layout

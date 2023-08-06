@@ -35,7 +35,8 @@ meteorological_data = fill_data(meteorological_data , predictions)
 meteorological_data = process_data_for_clustering(meteorological_data, include_area = False)
 
 fig = px.bar(meteorological_data , x=meteorological_data['Date'].tolist() ,y="danger" , title="Danger level")
-
+fig2 = px.pie(meteorological_data , values='danger' ,names='danger')
+fig3 = px.scatter_matrix(meteorological_data , dimensions=['FFMC' , 'DMC' , 'DC' ,'ISI'], color='danger')
 
 @app.callback(
     Output('graph1' , 'figure' , allow_duplicate=True),
@@ -56,5 +57,5 @@ def update_data(figure_value):
 
 colors = {1:'blue' , 2:'yellow' , 3:'red' , 4:'darkred'}
 
-app.layout = get_layout(fig ,dropdown_figures)
+app.layout = get_layout(fig ,fig2,fig3,dropdown_figures)
 app.run_server(threaded=True)
