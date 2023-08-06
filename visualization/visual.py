@@ -20,7 +20,7 @@ def set_area_of_interest(meteorological_data , figure):
 
 
 
-def get_layout(fig ,fig2,fig3,fig4, dropdown_figure):
+def get_layout(fig ,fig2,fig3,fig4, dropdown_figure , meteorological_data):
     layout = html.Div(
         children=[
         dbc.Row([
@@ -56,11 +56,20 @@ def get_layout(fig ,fig2,fig3,fig4, dropdown_figure):
                     ),
                     width={"size": 3},
                 ),
+                html.H2(children="Predicted FWI data from meteorological data"),
+                dash_table.DataTable(meteorological_data.to_dict('records') , [{"name":i , "id":i} for i in meteorological_data.columns],
+                              page_action='none' , style_table={'height': '300px', 'overflowY': 'auto'},id='datatable-after-gap',style_cell={'font_size': '26px','textAlign': 'center'},style_header={'border':'1px solid black','backgroundColor': 'white','fontWeight': 'bold'},style_data_conditional=[{'if': {'row_index': 'odd'},
+            'backgroundColor': 'rgb(220, 220, 220)','border': '1px solid blue',}],),
+            ],
+            align="center",
+            justify="center",
+        ),
+        dbc.Row(
                  dbc.Col(
                     dcc.Graph(id='graph1', figure=fig, style={'width': '90vh', 'height': '90vh'}),
                     align = "center",
                 ), 
-                ],),
+            ),
         dbc.Row(
             dbc.Col(
                     dcc.Graph(id='graph2' , figure=fig2 , style={'width' : '90vh' , 'height':'90vh'}),

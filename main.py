@@ -58,5 +58,5 @@ def update_data(figure_value):
 
 colors = {1:'blue' , 2:'yellow' , 3:'red' , 4:'darkred'}
 
-app.layout = get_layout(fig ,fig2,fig3,fig4,dropdown_figures)
+app.layout = get_layout(fig ,fig2,fig3,fig4,dropdown_figures , meteorological_data)
 app.run_server(threaded=True)
