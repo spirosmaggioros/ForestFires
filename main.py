@@ -5,7 +5,7 @@ import pandas as pd
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 import plotly.express as px
-from visualization.visual import get_layout
+from visualization.visual import get_layout , set_area_of_interest
 from sklearn.datasets import load_digits
 from dash import Dash ,  Output, Input
 from sklearn import metrics
@@ -24,19 +24,20 @@ def fill_data(meteorological_data , predictions):
     return meteorological_data
 
 
-data = pd.read_csv("forestfires.csv")
+data = pd.read_csv("data/forestfires.csv")
     
 data = process_data_for_clustering(data)
-meteorological_data = pd.read_csv('naxos_data.csv')
+meteorological_data = pd.read_csv('data/naxos_data.csv')
 
 knn = KNNRegressor(data)
 predictions = knn.predict(meteorological_data[['temp' , 'RH' , 'wind' , 'rain']].values.tolist())
 meteorological_data = fill_data(meteorological_data , predictions)
 meteorological_data = process_data_for_clustering(meteorological_data, include_area = False)
 
-fig = px.bar(meteorological_data , x=meteorological_data['Date'].tolist() ,y="danger" , title="Danger level")
-fig2 = px.pie(meteorological_data , values='danger' ,names='danger')
-fig3 = px.scatter_matrix(meteorological_data , dimensions=['FFMC' , 'DMC' , 'DC' ,'ISI'], color='danger')
+fig = set_area_of_interest(meteorological_data , 1)
+fig2 = set_area_of_interest(meteorological_data , 2)
+fig3 = set_area_of_interest(meteorological_data , 3)
+fig4 = set_area_of_interest(meteorological_data, 4)
 
 @app.callback(
     Output('graph1' , 'figure' , allow_duplicate=True),
@@ -57,5 +58,5 @@ def update_data(figure_value):
 
 colors = {1:'blue' , 2:'yellow' , 3:'red' , 4:'darkred'}
 
-app.layout = get_layout(fig ,fig2,fig3,dropdown_figures)
+app.layout = get_layout(fig ,fig2,fig3,fig4,dropdown_figures)
 app.run_server(threaded=True)
