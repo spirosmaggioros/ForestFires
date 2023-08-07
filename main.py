@@ -9,7 +9,9 @@ from visualization.visual import get_layout , set_area_of_interest
 from sklearn.datasets import load_digits
 from dash import Dash ,  Output, Input
 from sklearn import metrics
-from utils.algorithms import KNN_algorithm, dbscan_algorithm, svm_algorithm, kmeans_algorithm, random_forest_algorithm , KNNRegressor
+import seaborn as sns
+import matplotlib.pyplot as plt
+from utils.algorithms import KNN_algorithm, dbscan_algorithm,find_random_forest, svm_algorithm, kmeans_algorithm, random_forest_algorithm , KNNRegressor
 from utils.data_preprocess import process_data_for_clustering
 
 app = Dash(__name__, suppress_callback_exceptions=True)
@@ -23,13 +25,17 @@ def fill_data(meteorological_data , predictions):
     meteorological_data['ISI'] = predictions[: , 3]
     return meteorological_data
 
-
 data = pd.read_csv("data/forestfires.csv")
-    
+ 
 data = process_data_for_clustering(data)
+
 meteorological_data = pd.read_csv('data/naxos_data.csv')
 
+#random_forest_algorithm(data)
 knn = KNNRegressor(data)
+#y_pred , y_test = svm_algorithm(data , kernel='rbf')
+temp = random_forest_algorithm(data)
+
 predictions = knn.predict(meteorological_data[['temp' , 'RH' , 'wind' , 'rain']].values.tolist())
 meteorological_data = fill_data(meteorological_data , predictions)
 meteorological_data = process_data_for_clustering(meteorological_data, include_area = False)
@@ -58,5 +64,5 @@ def update_data(figure_value):
 
 colors = {1:'blue' , 2:'yellow' , 3:'red' , 4:'darkred'}
 
-app.layout = get_layout(fig ,fig2,fig3,fig4,dropdown_figures , meteorological_data)
-app.run_server(threaded=True)
+#app.layout = get_layout(fig ,fig2,fig3,fig4,dropdown_figures , meteorological_data)
+#app.run_server(threaded=True)

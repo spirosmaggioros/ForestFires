@@ -1,11 +1,11 @@
-from sklearn.metrics import classification_report
-from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.metrics import classification_report, mean_absolute_error , mean_squared_error
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV, train_test_split, KFold, cross_val_score
 from sklearn import svm
 import numpy as np
 from sklearn.cluster import DBSCAN
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.cluster import KMeans
-from sklearn.ensemble import  RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn import metrics
 from sklearn.metrics import accuracy_score , confusion_matrix
 from sklearn.tree import plot_tree
@@ -14,56 +14,90 @@ import torch
 import torch.nn as nn
 import math
 import pandas as pd
+from sklearn.svm import SVR
 #import tensorflow as tf
 import matplotlib.pyplot as plt
 #from tensorflow.keras import Model
 #from tensorflow.keras import Sequential
 #from tensorflow.keras.optimizers import Adam
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler , MinMaxScaler
 #from tensorflow.keras.layers import Dense, Dropout
 #from tensorflow.keras.losses import MeanSquaredLogarithmicError
 
+def find_parameters():
+    n_estimators = [int(x) for x in np.linspace(start=10 , stop=500, num=10)]
+    max_depth = [int(x) for x in np.linspace(10 , 100 , num=10)]
+    min_samples = [2 ,5 ,10]
+    min_samples_leaf = [1 , 2 ,4]
+    bootstrap=[True , False]
 
-def random_forest_algorithm(df):
+    random_grid = {
+            'n_estimators':n_estimators,
+            'max_depth':max_depth,
+            'min_samples_split':min_samples,
+            'min_samples_leaf':min_samples_leaf,
+            'bootstrap':bootstrap,
+            }
+    
+    return random_grid
+
+def random_forest_algorithm(data):
     #print(df.head())
     #spliting the dataset
-    X = df.drop(["danger", "month", "day"], axis=1)
-    y = df.pop('danger')
+    scaler = StandardScaler()
+    X = np.array(data[['temp' , 'wind' , 'RH' , 'rain']])
+    X = scaler.fit_transform(X)
+    y = np.array(data[['FFMC']])
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    rf = RandomForestRegressor(n_estimators=10, bootstrap=True, max_depth=40,min_samples_leaf=4,min_samples_split=2)
+    rf.fit(X_train , y_train.ravel())
+    
+    y_pred = rf.predict(X_test)
 
-
-    # Store the accuracies for different estimator values
-    accuracies = []
-    estimator_values = [10, 20, 50, 100, 150, 200, 250, 300]
-    # Train and evaluate the model for each estimator value
-    for n_estimators in estimator_values:
-        model = RandomForestClassifier(n_estimators=n_estimators, random_state=42)
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-        accuracy = accuracy_score(y_test, y_pred)
-        accuracies.append(accuracy)
-
-    # Plot the results
-    plt.plot(estimator_values, accuracies, marker='o')
-    plt.xlabel("Estimator Values")
-    plt.ylabel("Accuracy")
+    plt.figure()
+    plt.plot(y_pred , label='predictions' , marker='o')
+    plt.plot(y_test , label='original')
     plt.legend()
-    plt.title("Best parameters for the RFC")
-    #using the best model and graph it
-    rf = RandomForestClassifier(n_estimators=150, max_depth=3,
-                                max_features=3,
-                                min_samples_leaf=4, random_state=42)
-    rf.fit(X_train, y_train)
-    
-    fig = plt.figure(figsize=(15, 10))
-    plot_tree(rf.estimators_[0],filled=True, impurity=True,
-              rounded=True)
-    plt.title("THE FIRST DECISION TREE")
     plt.show()
-    
-    return 
+    error = abs(y_pred - y_test)
+    mape = np.mean(100 * (error / y_test))
+    acc = 100 - mape
+    print("ACCURACY : " + str(round(acc, 2)))
 
-def KNNRegressor(data , n_neighbors = 5):
+    #y_test = scaler.inverse_transform(y_test)
+    #y_pred = scaler.inverse_transform(y_pred)
+    return rf
+
+def evaluate(model, test_features, test_labels):
+    predictions = model.predict(test_features)
+    errors = abs(predictions - test_labels)
+    mape = 100 * np.mean(errors / test_labels)
+    accuracy = 100 - mape
+    print('Model Performance')
+    print('Average Error: {:0.4f} degrees.'.format(np.mean(errors)))
+    print('Accuracy = {:0.2f}%.'.format(accuracy))
+    
+    return accuracy
+
+def find_random_forest(data):
+    scaler = StandardScaler()
+    X = np.array(data[['temp' , 'RH' , 'rain' , 'wind']])
+    X = scaler.fit_transform(X)
+    y = np.array(data[['FFMC']])
+    rf = RandomForestRegressor()
+    grid_search = GridSearchCV(estimator = rf , param_grid = find_parameters(),
+                               cv = 5, n_jobs = -1 , verbose=2)
+    X_train , X_test , y_train , y_test = train_test_split(X , y ,train_size=0.2 , random_state=42)
+    
+    grid_search.fit(X_train , y_train.ravel())
+    best_params = grid_search.best_params_
+    print(best_params)
+    best_estimator = grid_search.best_estimator_
+    grid_accuracy = evaluate(best_estimator , X_test , y_test)
+   
+
+
+def KNNRegressor(data , n_neighbors = 9):
     X = data[['temp' , 'RH' , 'wind' , 'rain']].values.tolist()
     y = data[['FFMC' , 'DMC' , 'DC' , 'ISI']].values.tolist()
     #X_train , X_test , y_train , y_test = train_test_split(X , y , test_size=0.2 , random_state=42)
@@ -74,10 +108,10 @@ def KNNRegressor(data , n_neighbors = 5):
     #visual_predicted = []
 
     #for i in range(len(y_pred)):
-    #    visual_original.append(y_test[i][1])
+    #    visual_original.append(y_test[i][2])
 
     #for i in range(len(y_pred)):
-    #    visual_predicted.append(y_pred[i][1])
+    #    visual_predicted.append(y_pred[i][2])
 
     #fig = plt.figure()
     #plt.plot(visual_original , label='original')
@@ -91,7 +125,7 @@ def KNNRegressor(data , n_neighbors = 5):
 #    X = data[['temp', 'RH', 'wind', 'rain']].values.tolist()
 #    y = data[['FFMC', 'DMC', 'DC', 'ISI']].values.tolist()
 #    X_train , X_test , y_train , y_test = train_test_split(X , y , test_size=0.2 , random_state=42)
-#    #scaling function
+#    #scaling functionfrom sklearn.svm import SVR
 #    def scale_datasets(x_train, x_test):
 #
 #          """
@@ -100,7 +134,7 @@ def KNNRegressor(data , n_neighbors = 5):
 #          """
 #          # we can also use the minmax scaler or
 #          #even robust
-#          standard_scaler = StandardScaler()
+#          standard_scaler = Standfrom sklearn.svm import SVRardScaler()
 #          x_train_scaled = pd.DataFrame(
 #              standard_scaler.fit_transform(x_train),
 #              columns=x_train.columns
@@ -160,16 +194,20 @@ def KNNRegressor(data , n_neighbors = 5):
 
 def svm_algorithm(data , kernel='linear', random_state=42):
     #print(data.head())
-    data['area'] = np.log(1 + data['area'])
-    X = data[['FFMC', 'DMC','DC' , 'ISI', 'temp' , 'RH' , 'wind' , 'rain']].values.tolist()
-    y = data['danger'].values.tolist()
-    X_train , X_test , y_train , y_test = train_test_split(X ,y, test_size=0.3 , random_state=random_state)
+    X = data[['temp' , 'RH' , 'wind' , 'rain']].values.tolist()
+    y = data['FFMC'].values.tolist()
+    X_train , X_test , y_train , y_test = train_test_split(X ,y, test_size=0.2 , random_state=random_state)
 
-    clf = svm.SVC(kernel=kernel)
+    clf = SVR(kernel=kernel)
     clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
+    #plt.figure()
+    #plt.plot(y_pred , label='predictions')
+    #plt.plot(y_test , label='original') 
+    #plt.legend()
+    #plt.show()
     return y_pred , y_test
-
+ 
 def dbscan_algorithm(data , epsilon=3.5 , min_samples = 10):
     data.drop(columns=['area','month','day', 'X' , 'Y' , 'temp' , 'RH' , 'wind','rain'] , inplace=True)
     #data['area'] = np.log(1 + data['area'])
@@ -183,6 +221,7 @@ def dbscan_algorithm(data , epsilon=3.5 , min_samples = 10):
 def KNN_algorithm(data ,to_predict, n_neighbors=5 , random_state=42):
     X = data[['FFMC' , 'DMC' , 'DC', 'ISI' , 'temp', 'RH', 'wind' , 'rain']].values.tolist()
     y = data[[to_predict]].values.tolist()
+
     X_train , X_test , y_train , y_test = train_test_split(X, y, test_size = 0.2, random_state=random_state)
 
     knn = KNeighborsClassifier(n_neighbors = n_neighbors).fit(X_train, y_train)
