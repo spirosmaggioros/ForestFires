@@ -14,6 +14,11 @@ import torch
 import torch.nn as nn
 import math
 import pandas as pd
+<<<<<<< Updated upstream
+=======
+from sklearn.svm import SVR
+import requests
+>>>>>>> Stashed changes
 #import tensorflow as tf
 import matplotlib.pyplot as plt
 #from tensorflow.keras import Model
@@ -63,7 +68,29 @@ def random_forest_algorithm(df):
     
     return 
 
+<<<<<<< Updated upstream
 def KNNRegressor(data , n_neighbors = 5):
+=======
+def find_random_forest(data):
+    scaler = StandardScaler()
+    X = np.array(data[['temp' , 'RH' , 'rain' , 'wind']])
+    X = scaler.fit_transform(X)
+    y = np.array(data[['FFMC']])
+    rf = RandomForestRegressor()
+    grid_search = GridSearchCV(estimator = rf , param_grid = find_parameters(),
+                               cv = 5, n_jobs = -1 , verbose=2)
+    X_train , X_test , y_train , y_test = train_test_split(X , y ,train_size=0.2 , random_state=42)
+    
+    grid_search.fit(X_train , y_train.ravel())
+    best_params = grid_search.best_params_
+    print(best_params)
+    best_estimator = grid_search.best_estimator_
+    grid_accuracy = evaluate(best_estimator , X_test , y_test)
+   
+
+
+def KNNRegressor(data , n_neighbors = 9):
+>>>>>>> Stashed changes
     X = data[['temp' , 'RH' , 'wind' , 'rain']].values.tolist()
     y = data[['FFMC' , 'DMC' , 'DC' , 'ISI']].values.tolist()
     #X_train , X_test , y_train , y_test = train_test_split(X , y , test_size=0.2 , random_state=42)
@@ -173,7 +200,7 @@ def svm_algorithm(data , kernel='linear', random_state=42):
 def dbscan_algorithm(data , epsilon=3.5 , min_samples = 10):
     data.drop(columns=['area','month','day', 'X' , 'Y' , 'temp' , 'RH' , 'wind','rain'] , inplace=True)
     #data['area'] = np.log(1 + data['area'])
-    print(data)
+    print(data) 
     clustering = DBSCAN(eps=epsilon , min_samples=min_samples).fit(data)
     print("\n==============\nDBSCAN output\n==============\n")
     print(f"There are {np.unique(clustering.labels_)} clusters.")
