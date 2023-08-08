@@ -3,6 +3,8 @@ import pandas as pd
 from sklearn import linear_model
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
+import requests
+from datetime import datetime, timedelta
 
 cases = ['Low' , 'Moderate' , 'High' , 'Very High']
 
@@ -78,8 +80,31 @@ def process_data_for_clustering(data , include_area=True):
     return data
 
 def preprocess_forest_data(data):
+    data.dropna(subset=['address'] , inplace=True)
     data['area'] = data[['agricultural_area_burned' , 'crop_residue_area_burned' , 'dumping_ground_area_burned' , 'forest_area_burned' , 'grove_area_burned' ,'low_vegetation_area_burned', 'swamp_area_burned','woodland_area_burned']].sum(axis=1)
     data.drop(columns=['airplanes_cl215' , 'airplanes_cl415' , 'airplanes_gru' , 'airplanes_pzl' , 'army' , 'firefighters' , 'fire_station' , 'fire_trucks' , 'helicopters' , 'local_authorities_vehicles' , 'location' , 'machinery', 'other_firefighters' , 'machinery' , 'prefecture' , 'volunteers' , 'water_tank_trucks' , 'wildland_crew'] , inplace=True)
     data.drop(columns=['agricultural_area_burned' , 'crop_residue_area_burned' , 'dumping_ground_area_burned' ,'forest_area_burned' , 'grove_area_burned' ,'low_vegetation_area_burned', 'swamp_area_burned','woodland_area_burned'] , inplace=True)
     return data
 
+def fill_forest_data(data):
+    print(data['address'].isnull().sum())
+    for index , row in data.iterrows():
+        address = str(row['address'])
+        address = address.replace(" " , "-") 
+        start_time = row['start_time'][0:10]
+        response = requests.get('https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/' + address + '-Greece'  + '/' 
+                                + start_time +'/'+start_time+'?unitGroup=metric&include=days&key=UB4LE3EDV4RS24C69Y8WLWPMW&contentType=json')
+        if response.ok == False:
+            data.drop(index = data.index[index] , axis = 0 , inplace = True)
+            continue
+        add = response.json()
+        print(response.ok)
+        row['temp'] = add['days'][0].get('tempmax')
+        row['RH'] = add['days'][0].get('humidity')
+        row['wind'] = add['days'][0].get('windspeed')
+        row['rain'] = add['days'][0].get('precip')
+        row['conditions'] = add['days'][0].get('conditions')
+        row['description'] = add['days'][0].get('description')
+   
+    data.to_csv('NEW_DATA.csv' , index=False)
+    return data

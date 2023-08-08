@@ -10,7 +10,8 @@ from sklearn.datasets import load_digits
 from dash import Dash ,  Output, Input
 from sklearn import metrics
 from utils.algorithms import KNN_algorithm, dbscan_algorithm, svm_algorithm, kmeans_algorithm, random_forest_algorithm , KNNRegressor
-from utils.data_preprocess import process_data_for_clustering , preprocess_forest_data
+from utils.data_preprocess import process_data_for_clustering , preprocess_forest_data , fill_forest_data
+import requests
 
 app = Dash(__name__, suppress_callback_exceptions=True)
 
@@ -27,6 +28,8 @@ def fill_data(meteorological_data , predictions):
 data = pd.read_csv("data/forestfires.csv")
 forest_data = pd.read_csv("data/forest_data.csv")
 forest_data = preprocess_forest_data(forest_data)
+data = fill_forest_data(forest_data)
+print(data.head())
 
 data = process_data_for_clustering(data)
 
