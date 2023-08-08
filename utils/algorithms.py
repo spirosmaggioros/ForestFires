@@ -90,10 +90,10 @@ def find_random_forest(data):
     X_train , X_test , y_train , y_test = train_test_split(X , y ,train_size=0.2 , random_state=42)
     
     grid_search.fit(X_train , y_train.ravel())
-    best_params = grid_search.best_params_
-    print(best_params)
-    best_estimator = grid_search.best_estimator_
-    grid_accuracy = evaluate(best_estimator , X_test , y_test)
+    y_pred = grid_search.predict(X_test)
+
+    print(mean_absolute_error(y_pred , y_test))
+    return grid_search
    
 
 

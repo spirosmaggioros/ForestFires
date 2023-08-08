@@ -26,7 +26,6 @@ def fill_data(meteorological_data , predictions):
     return meteorological_data
 
 data = pd.read_csv("data/forestfires.csv")
- 
 data = process_data_for_clustering(data)
 
 meteorological_data = pd.read_csv('data/naxos_data.csv')
