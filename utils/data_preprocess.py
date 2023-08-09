@@ -87,18 +87,19 @@ def preprocess_forest_data(data):
     return data
 
 def fill_forest_data(data):
-    print(data['address'].isnull().sum())
+    data.to_csv("temp_data.csv")
+    response = requests.Session()
     for index , row in data.iterrows():
+        print(index)
         address = str(row['address'])
         address = address.replace(" " , "-") 
         start_time = row['start_time'][0:10]
         response = requests.get('https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/' + address + '-Greece'  + '/' 
-                                + start_time +'/'+start_time+'?unitGroup=metric&include=days&key=UB4LE3EDV4RS24C69Y8WLWPMW&contentType=json')
+                                + start_time +'/'+start_time+'?unitGroup=metric&include=days&key=UB4LE3EDV4RS24C69Y8WLWPMW&contentType=json', headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36"})
         if response.ok == False:
             data.drop(index = data.index[index] , axis = 0 , inplace = True)
             continue
         add = response.json()
-        print(response.ok)
         row['temp'] = add['days'][0].get('tempmax')
         row['RH'] = add['days'][0].get('humidity')
         row['wind'] = add['days'][0].get('windspeed')
@@ -106,5 +107,5 @@ def fill_forest_data(data):
         row['conditions'] = add['days'][0].get('conditions')
         row['description'] = add['days'][0].get('description')
    
-    data.to_csv('NEW_DATA.csv' , index=False)
+    data.to_csv('NEW_DATA.csv')
     return data

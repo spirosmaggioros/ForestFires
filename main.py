@@ -28,8 +28,8 @@ def fill_data(meteorological_data , predictions):
 data = pd.read_csv("data/forestfires.csv")
 forest_data = pd.read_csv("data/forest_data.csv")
 forest_data = preprocess_forest_data(forest_data)
-data = fill_forest_data(forest_data)
-print(data.head())
+forest_data = fill_forest_data(forest_data)
+print(forest_data.head())
 
 data = process_data_for_clustering(data)
 
