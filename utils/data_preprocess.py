@@ -5,6 +5,7 @@ from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 import requests
 from datetime import datetime, timedelta
+import time
 
 cases = ['Low' , 'Moderate' , 'High' , 'Very High']
 
@@ -88,26 +89,50 @@ def preprocess_forest_data(data):
 
 def fill_forest_data(data):
     response = requests.Session()
+    longitude  = []
+    latitude = []
+    temp = []
+    RH = []
+    wind = []
+    rain = []
+    conditions = []
+    description = []
     for index , row in data.iterrows():
         print(index)
         address = str(row['address'])
         address = address.replace(" " , "-") 
         start_time = row['start_time'][0:10]
         hour = row['start_time'][11:19]
-        response = requests.get('https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/' + address + '-Greece'  + '/' 
+        ans = response.get('https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/' + address + '-Greece'  + '/'
                                 + start_time +'T'+hour+'?unitGroup=metric&include=days&key=UB4LE3EDV4RS24C69Y8WLWPMW&contentType=json&include=current&elements=tempmax,humidity,windspeed,precip,conditions,description', headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36"})
-        if response.ok == False:
-            data.drop(index = data.index[index] , axis = 0 , inplace = True)
+
+        if ans.ok == False:
+            longitude.append(None)
+            latitude.append(None)
+            temp.append(None)
+            RH.append(None)
+            wind.append(None)
+            rain.append(None)
+            conditions.append(None)
+            description.append(None)
             continue
-        add = response.json()
-        row['longitude'] = add['longitude']
-        row['latitude'] = add['latitude']
-        row['temp'] = add['days'][0].get('tempmax')
-        row['RH'] = add['days'][0].get('humidity')
-        row['wind'] = add['days'][0].get('windspeed')
-        row['rain'] = add['days'][0].get('precip')
-        row['conditions'] = add['days'][0].get('conditions')
-        row['description'] = add['days'][0].get('description')
-   
+        add = ans.json()
+        longitude.append(add['longitude'])
+        latitude.append(add['latitude'])
+        temp.append(add['days'][0].get('tempmax'))
+        RH.append(add['days'][0].get('humidity'))
+        wind.append(add['days'][0].get('windspeed'))
+        rain.append(add['days'][0].get('precip'))
+        conditions.append(add['days'][0].get('conditions'))
+        description.append(add['days'][0].get('description'))
+
+    data['longitude'] = longitude
+    data['latitude'] = latitude
+    data['temp'] = temp
+    data['RH'] = RH
+    data['wind'] = wind
+    data['rain'] = rain
+    data['conditions'] = conditions
+    data['description'] = description
     data.to_csv('NEW_DATA.csv')
     return data

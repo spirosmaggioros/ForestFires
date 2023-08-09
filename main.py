@@ -11,7 +11,6 @@ from dash import Dash ,  Output, Input
 from sklearn import metrics
 from utils.algorithms import KNN_algorithm, dbscan_algorithm, svm_algorithm, kmeans_algorithm, random_forest_algorithm , KNNRegressor
 from utils.data_preprocess import process_data_for_clustering , preprocess_forest_data , fill_forest_data
-import requests
 
 app = Dash(__name__, suppress_callback_exceptions=True)
 
