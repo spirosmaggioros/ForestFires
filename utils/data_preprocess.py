@@ -80,11 +80,10 @@ def process_data_for_clustering(data , include_area=True):
     #data = pd.DataFrame(imputer.fit_transform(data),columns = data.columns, index=data.index)
     return data
 
+
+
 def preprocess_forest_data(data):
-    data.dropna(subset=['address'] , inplace=True)
-    data['area'] = data[['agricultural_area_burned' , 'crop_residue_area_burned' , 'dumping_ground_area_burned' , 'forest_area_burned' , 'grove_area_burned' ,'low_vegetation_area_burned', 'swamp_area_burned','woodland_area_burned']].sum(axis=1)
-    data.drop(columns=['airplanes_cl215' , 'airplanes_cl415' , 'airplanes_gru' , 'airplanes_pzl' , 'army' , 'firefighters' , 'fire_station' , 'fire_trucks' , 'helicopters' , 'local_authorities_vehicles' , 'location' , 'machinery', 'other_firefighters' , 'machinery' , 'prefecture' , 'volunteers' , 'water_tank_trucks' , 'wildland_crew'] , inplace=True)
-    data.drop(columns=['agricultural_area_burned' , 'crop_residue_area_burned' , 'dumping_ground_area_burned' ,'forest_area_burned' , 'grove_area_burned' ,'low_vegetation_area_burned', 'swamp_area_burned','woodland_area_burned'] , inplace=True)
+    data.dropna(subset=['end_time' , 'temp'] , inplace=True)
     return data
 
 def fill_forest_data(data):

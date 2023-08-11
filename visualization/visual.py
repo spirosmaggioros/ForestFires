@@ -4,23 +4,26 @@ from dash import html, dcc, dash_table
 import plotly.express as px
 
 
-def set_area_of_interest(meteorological_data , figure):
+def set_area_of_interest(data , figure):
     if figure == 1:
-        fig = px.bar(meteorological_data , x=meteorological_data['Date'].tolist() ,y="danger" , title="Danger level")
+        fig = px.bar(data , x=data['Date'].tolist() ,y="danger" , title="Danger level")
     elif figure == 2:
-        fig = px.pie(meteorological_data , values='danger' ,names='danger')
+        fig = px.pie(data , values='danger' ,names='danger')
     elif figure == 3:
-        fig = px.scatter_matrix(meteorological_data , dimensions=['FFMC' , 'DMC' , 'DC' ,'ISI'], color='danger')
-    else:
-        fig = px.parallel_coordinates(meteorological_data , color='danger' , labels={'FFMC' : 'FFMC' , 'DMC':'DMC' , 'DC':'DC' , 'ISI':'ISI',},
+        fig = px.scatter_matrix(data , dimensions=['FFMC' , 'DMC' , 'DC' ,'ISI'], color='danger')
+    elif figure == 4:
+        fig = px.parallel_coordinates(data , color='danger' , labels={'FFMC' : 'FFMC' , 'DMC':'DMC' , 'DC':'DC' , 'ISI':'ISI',},
                                       color_continuous_scale=px.colors.diverging.Tealrose, color_continuous_midpoint=2)
+    elif figure == 5:
+        fig = px.density_mapbox(data , lat='latitude' , lon='longitude' , z='area' , radius=10 , center=dict(lat=38, lon=24) , zoom=5 , mapbox_style="stamen-terrain")
+        #fig = px.scatter_geo(data , lat='latitude' , lon ='longitude')
 
     return fig
 
 
 
 
-def get_layout(fig ,fig2,fig3,fig4, dropdown_figure , meteorological_data):
+def get_layout(fig ,fig2,fig3,fig4,fig5, dropdown_figure , meteorological_data):
     layout = html.Div(
         children=[
         dbc.Row([
@@ -65,7 +68,7 @@ def get_layout(fig ,fig2,fig3,fig4, dropdown_figure , meteorological_data):
             justify="center",
         ),
         dbc.Row(
-                 dbc.Col(
+                dbc.Col(
                     dcc.Graph(id='graph1', figure=fig, style={'width': '90vh', 'height': '90vh'}),
                     align = "center",
                 ), 
@@ -84,6 +87,9 @@ def get_layout(fig ,fig2,fig3,fig4, dropdown_figure , meteorological_data):
              dbc.Col(
                 dcc.Graph(id='graph4' , figure=fig4 , style={'width' : '100vh' , 'height':'100vh'}),
                 ),
+             dbc.Col(
+                 dcc.Graph(id='graph5' , figure=fig5 , style={'width': '100vh' , 'height':'100vh'}),
+                 ),
             ],),
     ],)
 

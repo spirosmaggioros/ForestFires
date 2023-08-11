@@ -9,8 +9,10 @@ from visualization.visual import get_layout , set_area_of_interest
 from sklearn.datasets import load_digits
 from dash import Dash ,  Output, Input
 from sklearn import metrics
-from utils.algorithms import KNN_algorithm, dbscan_algorithm, svm_algorithm, kmeans_algorithm, random_forest_algorithm , KNNRegressor
+from utils.algorithms import KNN_algorithm, dbscan_algorithm, svm_algorithm, kmeans_algorithm, random_forest_algorithm , KNNRegressor , agglomerative_clustering
 from utils.data_preprocess import process_data_for_clustering , preprocess_forest_data , fill_forest_data
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 app = Dash(__name__, suppress_callback_exceptions=True)
 
@@ -25,10 +27,14 @@ def fill_data(meteorological_data , predictions):
 
 
 data = pd.read_csv("data/forestfires.csv")
-forest_data = pd.read_csv("data/forest_data.csv")
+forest_data = pd.read_csv("NEW_DATA.csv")
 forest_data = preprocess_forest_data(forest_data)
-forest_data = fill_forest_data(forest_data)
-print(forest_data.head())
+#forest_data = fill_forest_data(forest_data)
+#knn = KNNRegressor(forest_data)
+#rf = random_forest_algorithm(forest_data)
+#forest_data = forest_data[['temp' , 'rain' , 'wind' , 'RH' , 'area']]
+#heatmap = sns.heatmap(forest_data.corr()[['area']].sort_values(by='area' , ascending=False) , vmin=-1 , vmax = 1 , annot=True , cmap='BrBG')
+#plt.show()
 
 data = process_data_for_clustering(data)
 
@@ -38,10 +44,13 @@ predictions = knn.predict(meteorological_data[['temp' , 'RH' , 'wind' , 'rain']]
 meteorological_data = fill_data(meteorological_data , predictions)
 meteorological_data = process_data_for_clustering(meteorological_data, include_area = False)
 
+
 fig = set_area_of_interest(meteorological_data , 1)
 fig2 = set_area_of_interest(meteorological_data , 2)
 fig3 = set_area_of_interest(meteorological_data , 3)
 fig4 = set_area_of_interest(meteorological_data, 4)
+fig5 = set_area_of_interest(forest_data , 5)
+
 
 @app.callback(
     Output('graph1' , 'figure' , allow_duplicate=True),
@@ -62,5 +71,5 @@ def update_data(figure_value):
 
 colors = {1:'blue' , 2:'yellow' , 3:'red' , 4:'darkred'}
 
-app.layout = get_layout(fig ,fig2,fig3,fig4,dropdown_figures , meteorological_data)
+app.layout = get_layout(fig ,fig2,fig3,fig4,fig5, dropdown_figures , meteorological_data)
 app.run_server(threaded=True)
