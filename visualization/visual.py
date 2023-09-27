@@ -15,7 +15,7 @@ def set_area_of_interest(data , figure):
         fig = px.parallel_coordinates(data , color='danger' , labels={'FFMC' : 'FFMC' , 'DMC':'DMC' , 'DC':'DC' , 'ISI':'ISI',},
                                       color_continuous_scale=px.colors.diverging.Tealrose, color_continuous_midpoint=2)
     elif figure == 5:
-        fig = px.density_mapbox(data , lat='latitude' , lon='longitude' , z='area' , radius=10 , center=dict(lat=38, lon=24) , zoom=5 , mapbox_style="stamen-terrain")
+        fig = px.density_mapbox(data , lat='latitude' , lon='longitude' , z='danger' , radius=10 , center=dict(lat=38, lon=24) , zoom=5 , mapbox_style="stamen-terrain")
         #fig = px.scatter_geo(data , lat='latitude' , lon ='longitude')
 
     return fig
@@ -23,7 +23,7 @@ def set_area_of_interest(data , figure):
 
 
 
-def get_layout(fig ,fig2,fig3,fig4,fig5, dropdown_figure , meteorological_data):
+def get_layout(fig ,fig2,fig3,fig4,fig5, dropdown_figure ,dropdown_dates, meteorological_data):
     layout = html.Div(
         children=[
         dbc.Row([
@@ -51,7 +51,10 @@ def get_layout(fig ,fig2,fig3,fig4,fig5, dropdown_figure , meteorological_data):
                         dbc.CardBody([
                             dcc.Markdown(children="Select Case" , style={'font-size': 20}),
                             html.Br(),
-
+                            dcc.Markdown(children="Select Date" , style={'font-size': 20}),
+                            html.Br(),
+                            dcc.Dropdown(dropdown_dates , 'dates' , id='dropdown-dates' , style={'font-size': 20}),
+                            html.Br(),
                             dcc.Dropdown(dropdown_figure, 'dbscan', id='dropdown-figure',  style={'font-size': 20}),
                             html.Br(),
 
@@ -94,4 +97,5 @@ def get_layout(fig ,fig2,fig3,fig4,fig5, dropdown_figure , meteorological_data):
     ],)
 
     return layout
+
 
