@@ -4,8 +4,10 @@ from sklearn import linear_model
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 import requests
+import datetime as dt
 from datetime import datetime, timedelta
 import time
+pd.options.mode.chained_assignment = None  # default='warn'
 
 cases = ['Low' , 'Moderate' , 'High' , 'Very High']
 
@@ -71,9 +73,11 @@ def convert_int_to_str(data):
     if data['danger'] >= 4:
         return 'Extreme'
 
-def process_data_for_clustering(data , include_area=True):
+def process_data_for_clustering(data , include_area=True , include_date=False):
     if include_area==True:
         data['area'] = np.log(1 + data['area'])
+    if include_date==True:
+        data['Date'] = data['start_time'].str[0:10]
     #data.drop(columns=['X' , 'Y' , 'month' , 'day'] , inplace=True)
     data['danger'] = data.apply(add_danger_column, axis=1)
     #imputer = IterativeImputer(estimator=linear_model.BayesianRidge(), sample_posterior=True,random_state=0)
@@ -83,7 +87,7 @@ def process_data_for_clustering(data , include_area=True):
 
 
 def preprocess_forest_data(data):
-    data.dropna(subset=['end_time' , 'temp'] , inplace=True)
+    data.dropna(subset=['start_time' , 'end_time' , 'temp'] , inplace=True)
     return data
 
 def fill_forest_data(data):
