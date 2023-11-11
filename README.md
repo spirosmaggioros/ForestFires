@@ -1,4 +1,4 @@
-#Wildfire danger optimization using Deep Learning and Transfer Learning
+# Wildfire danger optimization using Deep Learning and Transfer Learning
 
 This is the code for every implementation for the paper: Wildfire danger prediction optimization using deep learning.
 We used Transfer Learning to create accurate CNN models to detect if a forest has been destroyed by a wildfire or not to help the already existing FWI prediction.
