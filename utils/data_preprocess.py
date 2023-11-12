@@ -107,7 +107,7 @@ def fill_forest_data(data):
         start_time = row['start_time'][0:10]
         hour = row['start_time'][11:19]
         ans = response.get('https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/' + address + '-Greece'  + '/'
-                                + start_time +'T'+hour+'?unitGroup=metric&include=days&key=UB4LE3EDV4RS24C69Y8WLWPMW&contentType=json&include=current&elements=tempmax,humidity,windspeed,precip,conditions,description', headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36"})
+                                + start_time +'T'+hour+'?unitGroup=metric&include=days&key=ΜΥΚΕΥ&contentType=json&include=current&elements=tempmax,humidity,windspeed,precip,conditions,description', headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36"})
 
         if ans.ok == False:
             longitude.append(None)
